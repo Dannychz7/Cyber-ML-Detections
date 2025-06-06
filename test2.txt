@@ -1,0 +1,59 @@
+import joblib
+import pandas as pd
+import numpy as np
+
+testPath = "/Users/danielchavez/Downloads/Courses/MohsinResearch/Neural Networks/test.csv"
+
+def preprocess_features(df):
+    """Feature engineering that applies to both train and test data"""
+    # Age features
+    df['HouseAge'] = df['YrSold'] - df['YearBuilt']
+    df['RemodAge'] = df['YrSold'] - df['YearRemodAdd']
+    df['GarageAge'] = df['YrSold'] - df['GarageYrBlt']
+    
+    # Area features
+    df['TotalSF'] = df['TotalBsmtSF'] + df['1stFlrSF'] + df['2ndFlrSF']
+    df['TotalBathrooms'] = (df['FullBath'] + (0.5 * df['HalfBath']) + 
+                          df['BsmtFullBath'] + (0.5 * df['BsmtHalfBath']))
+    
+    # Binary features
+    df['HasSecondFloor'] = (df['2ndFlrSF'] > 0).astype(int)
+    df['HasPool'] = (df['PoolArea'] > 0).astype(int)
+    
+    return df
+
+# 1. Load the model
+model_data = joblib.load('house_price_pipeline.pkl')
+pipeline = model_data['pipeline']
+expected_columns = model_data['expected_columns']
+log_target = model_data['log_target']
+
+# 2. Load your test data
+test_data = pd.read_csv(testPath)
+
+# 3. Drop the 'Id' column if it exists
+if 'Id' in test_data.columns:
+    test_data = test_data.drop(columns=['Id'])
+
+# print(expected_columns)
+
+# 4. Ensure columns match exactly
+test_data = test_data[expected_columns]
+
+# 5. Make predictions
+predictions = pipeline.predict(test_data)
+
+# 6. If target was log-transformed, undo the log
+if log_target:
+    predictions = np.expm1(predictions)  # exp(x) - 1 to invert log1p
+
+# 7. Show the predictions
+print(predictions)
+
+# (Optional) Save to CSV
+output = pd.DataFrame({
+    'Id': pd.read_csv(testPath)['Id'],  # Put Id back for matching
+    'SalePrice': predictions
+})
+output.to_csv('submission.csv', index=False)
+print("✅ Predictions saved to submission.csv")
