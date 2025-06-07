@@ -1,0 +1,12 @@
+Fwd IAT Min
+Bwd IAT Min
+Fwd PSH Flags
+FIN Flag Count
+SYN Flag Count
+RST Flag Count
+PSH Flag Count
+ACK Flag Count
+URG Flag Count
+ECE Flag Count
+min_seg_size_forward
+Idle Std
