@@ -13,9 +13,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
+from config import DATAPATH_FRIDAY_WORK_HRS_AFTERNOON
 
 # === Step 1: Load Data ===
-csv_file = "MachineLearningCVE/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+csv_file = DATAPATH_FRIDAY_WORK_HRS_AFTERNOON
 df = pd.read_csv(csv_file)
 
 # === Step 2: Clean Data ===

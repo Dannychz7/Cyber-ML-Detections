@@ -8,9 +8,10 @@ from sklearn.metrics import classification_report, confusion_matrix, roc_auc_sco
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+from config import DATAPATH_FRIDAY_WORK_HRS_AFTERNOON
 
 # === Step 1: Load Data ===
-csv_file = "MachineLearningCVE/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
+csv_file = DATAPATH_FRIDAY_WORK_HRS_AFTERNOON
 df = pd.read_csv(csv_file)
 
 # === Step 2: Clean Data ===
