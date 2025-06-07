@@ -269,7 +269,7 @@ for i, (feat, imp) in enumerate(feature_importance.head(5).values):
 joblib.dump(scaler, "models/ddos_scaler.pkl")
 joblib.dump(model_rand, "models/ddos_xgb_model.pkl")
 
-print("✅ Saved trained scaler and model to disk.")
+print("â Saved trained scaler and model to disk.")
 
 # Final reality check
 print(f"\n=== Final Reality Check ===")
@@ -331,9 +331,9 @@ if constant_attack_features:
 
 # Suggest next steps
 print(f"\n=== Final Recommendations ===")
-print("✅ SUCCESS: You now have a realistic DDoS detection model!")
-print("📊 82% accuracy with meaningful trade-offs is actually excellent")
-print("🎯 Next steps for improvement:")
+print("â SUCCESS: You now have a realistic DDoS detection model!")
+print("ð 82% accuracy with meaningful trade-offs is actually excellent")
+print("ð¯ Next steps for improvement:")
 print("1. Tune the decision threshold to balance precision/recall")
 print("2. Try ensemble methods (Random Forest + XGBoost)")
 print("3. Add domain knowledge features (burst patterns, flow duration bins)")
