@@ -1,0 +1,1 @@
+DATAPATH_FRIDAY_WORK_HRS_AFTERNOON = "/Users/danielchavez/Cybersecurity/Anomalous_Inbound_BytesML/Cyber-ML-Detections/MachineLearningCVE/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv"
