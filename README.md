@@ -16,7 +16,7 @@ This repository contains various machine learning models and scripts for detecti
 ## Repository Structure
 ```
 Cyber-ML-Detections/
-├── DDOS_ML_Detection/              # DDoS detection models using XGBoost and PyTorch
+├── DDOS_ML_Detection/              # DDoS detection models using XGBoost and PyTorch (OPERATIONAL)
 └── Anamolous_Inbound_Traffic_Logs/ # UNDER DEVELOPMENT: Tailored detection using synthetic data
 ```
 
@@ -27,6 +27,13 @@ Cyber-ML-Detections/
    git clone https://github.com/Dannychz7/Cyber-ML-Detections.git
    cd Cyber-ML-Detections
 ```
+
+2. Navigate to the DDoS detection directory:
+```bash
+   cd DDOS_ML_Detection
+```
+
+3. See the [DDOS_ML_Detection README](DDOS_ML_Detection/README.md) for detailed setup and usage instructions.
 
 ## Dataset
 
@@ -39,9 +46,35 @@ Cyber-ML-Detections/
 
 **Disclaimer:** I do not claim ownership of the CIC-IDS 2017 dataset. All intellectual property rights are reserved by its original creators.
 
-## Status
+## Project Status
 
-**Note:** Testing and pipeline functionality are still under refinement and not fully operational at this time.
+### Operational
+- **DDOS_ML_Detection** - Both PyTorch and XGBoost implementations are fully functional
+  - PyTorch model training and prediction pipeline
+  - XGBoost model training and prediction pipeline
+  - Automated visualization and reporting
+  - Sample data prediction capabilities
+
+### Under Development
+- **Anamolous_Inbound_Traffic_Logs** - Tailored detection using synthetic data (in progress)
+
+## Quick Start - DDoS Detection
+
+Both models are ready to use:
+
+**PyTorch Model:**
+```bash
+cd DDOS_ML_Detection
+python3 PTorch_main.py
+```
+
+**XGBoost Model:**
+```bash
+cd DDOS_ML_Detection
+python3 XGBoost_main.py
+```
+
+For detailed instructions, model outputs, and prediction examples, see the [DDOS_ML_Detection README](DDOS_ML_Detection/README.md).
 
 ## Contact
 
@@ -49,4 +82,4 @@ Maintained by @Dannychz7
 
 ---
 
-*Future enhancements may include screenshots, additional datasets, and performance metrics.*
+*Future enhancements may include additional detection models, expanded datasets, and enhanced performance metrics.*
