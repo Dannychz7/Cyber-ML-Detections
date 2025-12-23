@@ -2,3 +2,4 @@ MachineLearningCVE/
 DDOS_ML_Detection/config.py
 DDOS_ML_Detection/venv/
 __pycache__/
+.DS_Store
