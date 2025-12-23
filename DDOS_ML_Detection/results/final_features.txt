@@ -1,0 +1,7 @@
+Fwd IAT Min
+Bwd IAT Min
+FIN Flag Count
+PSH Flag Count
+ACK Flag Count
+URG Flag Count
+Idle Std

@@ -28,13 +28,14 @@ def main(input_csv):
     # Select features in correct order
     X = df[expected_features]
 
-    # Optional: load and apply scaler if you saved it
-    scaler = joblib.load("models/ddos_scaler.pkl")
+# 1. Load and apply scaler 
+    # (The scaler MUST have been trained on the same 7 or 12 features)
+    scaler = joblib.load("models/ddos_scaler_xgb.pkl")
     X_scaled = scaler.transform(X)
 
-    # If you did NOT save scaler, predict directly (make sure your model expects unscaled or scaled accordingly)
-    y_pred = model.predict(X)
-    y_pred_proba = model.predict_proba(X)[:, 1]
+    # 2. Predict using the SCALED data, not the raw 'X'
+    y_pred = model.predict(X_scaled) 
+    y_pred_proba = model.predict_proba(X_scaled)[:, 1]
 
     # Output predictions
     df['predicted_label'] = y_pred

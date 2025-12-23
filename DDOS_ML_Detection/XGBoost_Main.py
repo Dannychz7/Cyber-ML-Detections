@@ -8,54 +8,222 @@ from sklearn.metrics import classification_report, confusion_matrix, roc_auc_sco
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
+from scipy import stats
+import logging
+from datetime import datetime
+import os
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
 from config import DATAPATH_FRIDAY_WORK_HRS_AFTERNOON
 
+# === Setup Directories and Logging ===
+os.makedirs("results", exist_ok=True)
+os.makedirs("plots", exist_ok=True)
+os.makedirs("models", exist_ok=True)
+
+# Setup logging
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+log_filename = f"results/ddos_analysis_{timestamp}.log"
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_filename),
+        logging.StreamHandler()  # Still show some output to console
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+class AnalysisResults:
+    """Class to store analysis results for executive summary"""
+    def __init__(self):
+        self.dataset_shape = None
+        self.features_removed = []
+        self.final_feature_count = 0
+        self.cv_auc_mean = 0
+        self.cv_auc_std = 0
+        self.temporal_auc = 0
+        self.random_auc = 0
+        self.false_positive_rate = 0
+        self.false_negative_rate = 0
+        self.top_features = []
+        self.class_distribution = {}
+        self.recommendations = []
+
+results = AnalysisResults()
+
+def log_section(title):
+    """Helper function to log section headers"""
+    logger.info("=" * 50)
+    logger.info(f" {title}")
+    logger.info("=" * 50)
+
+def print_executive_summary():
+    """Print executive summary to console"""
+    print("\n" + "="*60)
+    print("  DDOS DETECTION MODEL - EXECUTIVE SUMMARY")
+    print("="*60)
+    
+    print(f"\n DATASET OVERVIEW")
+    print(f"   • Original samples: {results.dataset_shape[0]:,}")
+    print(f"   • Final features: {results.final_feature_count}")
+    print(f"   • Features removed: {len(results.features_removed)}")
+    
+    print(f"\n MODEL PERFORMANCE")
+    print(f"   • Cross-validation AUC: {results.cv_auc_mean:.3f} (±{results.cv_auc_std:.3f})")
+    print(f"   • Temporal split AUC: {results.temporal_auc:.3f}")
+    print(f"   • Random split AUC: {results.random_auc:.3f}")
+    
+    print(f"\n  ERROR RATES")
+    print(f"   • False Positive Rate: {results.false_positive_rate:.4f}")
+    print(f"   • False Negative Rate: {results.false_negative_rate:.4f}")
+    
+    print(f"\n TOP PREDICTIVE FEATURES")
+    for i, (feature, importance) in enumerate(results.top_features[:5], 1):
+        print(f"   {i}. {feature}: {importance:.3f}")
+    
+    print(f"\n RECOMMENDATIONS")
+    for i, rec in enumerate(results.recommendations, 1):
+        print(f"   {i}. {rec}")
+    
+    print(f"\n Detailed logs saved to: {log_filename}")
+    print("="*60)
+
+def create_pdf_report():
+    """Create a PDF report"""
+    pdf_filename = f"results/ddos_analysis_report_{timestamp}.pdf"
+    doc = SimpleDocTemplate(pdf_filename, pagesize=A4)
+    styles = getSampleStyleSheet()
+    story = []
+    
+    # Title
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        textColor=colors.darkblue,
+        spaceAfter=30,
+        alignment=1  # Center alignment
+    )
+    story.append(Paragraph("DDoS Detection Model Analysis Report", title_style))
+    story.append(Spacer(1, 20))
+    
+    # Executive Summary
+    story.append(Paragraph("Executive Summary", styles['Heading2']))
+    
+    summary_data = [
+        ["Metric", "Value"],
+        ["Dataset Size", f"{results.dataset_shape[0]:,} samples"],
+        ["Final Feature Count", str(results.final_feature_count)],
+        ["Features Removed", str(len(results.features_removed))],
+        ["Cross-validation AUC", f"{results.cv_auc_mean:.3f} (±{results.cv_auc_std:.3f})"],
+        ["Temporal Split AUC", f"{results.temporal_auc:.3f}"],
+        ["Random Split AUC", f"{results.random_auc:.3f}"],
+        ["False Positive Rate", f"{results.false_positive_rate:.4f}"],
+        ["False Negative Rate", f"{results.false_negative_rate:.4f}"]
+    ]
+    
+    table = Table(summary_data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    story.append(table)
+    story.append(Spacer(1, 20))
+    
+    # Top Features
+    story.append(Paragraph("Top Predictive Features", styles['Heading2']))
+    feature_data = [["Rank", "Feature", "Importance"]]
+    for i, (feature, importance) in enumerate(results.top_features[:10], 1):
+        feature_data.append([str(i), feature, f"{importance:.3f}"])
+    
+    feature_table = Table(feature_data)
+    feature_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    story.append(feature_table)
+    story.append(Spacer(1, 20))
+    
+    # Recommendations
+    story.append(Paragraph("Recommendations", styles['Heading2']))
+    for i, rec in enumerate(results.recommendations, 1):
+        story.append(Paragraph(f"{i}. {rec}", styles['Normal']))
+    
+    doc.build(story)
+    return pdf_filename
+
+# === Main Analysis ===
+log_section("STARTING DDOS DETECTION ANALYSIS")
+
 # === Step 1: Load Data ===
+logger.info("Loading dataset...")
 csv_file = DATAPATH_FRIDAY_WORK_HRS_AFTERNOON
 df = pd.read_csv(csv_file)
+logger.info(f"Loaded dataset: {df.shape}")
 
 # === Step 2: Clean Data ===
-df.columns = df.columns.str.strip()  # remove leading/trailing spaces
+logger.info("Cleaning data...")
+df.columns = df.columns.str.strip()
 df = df.replace([np.inf, -np.inf], np.nan)
 df = df.dropna()
-
-print(f"Dataset shape after cleaning: {df.shape}")
+results.dataset_shape = df.shape
+logger.info(f"Dataset shape after cleaning: {df.shape}")
 
 # === Step 3: Binary Labeling ===
 df['binary_label'] = df['Label'].apply(lambda x: 0 if x == 'BENIGN' else 1)
+results.class_distribution = df['binary_label'].value_counts().to_dict()
+logger.info(f"Class distribution: {results.class_distribution}")
 
-# === Step 4: Remove More Aggressive Leaky Features ===
+# === Step 4: Remove Aggressive Leaky Features ===
+log_section("FEATURE CLEANING")
 df = df.drop(columns=['Label'])
 
-# Expanded list of potentially leaky features
 leaky_features = [
     'Flow Bytes/s', 'Flow Packets/s', 'Init_Win_bytes_backward', 'Init_Win_bytes_forward',
-    'Fwd Header Length', 'Bwd Header Length',
-    # Additional potentially leaky features
-    'Flow Duration',  # Attack duration patterns
-    'Total Fwd Packets', 'Total Backward Packets',  # Too distinctive for attacks
-    'Total Length of Fwd Packets', 'Total Length of Bwd Packets',  # Size patterns
-    'Fwd Packets/s', 'Bwd Packets/s',  # Rate-based features are very leaky
-    'Flow IAT Mean', 'Flow IAT Std', 'Flow IAT Max', 'Flow IAT Min',  # Timing signatures
-    'Fwd IAT Total', 'Bwd IAT Total',  # Timing aggregates
-    'Down/Up Ratio',  # Often perfect separator
-    'Average Packet Size', 'Avg Fwd Segment Size', 'Avg Bwd Segment Size'  # Size signatures
+    'Fwd Header Length', 'Bwd Header Length', 'Flow Duration', 'Total Fwd Packets', 
+    'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets',
+    'Fwd Packets/s', 'Bwd Packets/s', 'Flow IAT Mean', 'Flow IAT Std', 'Flow IAT Max', 
+    'Flow IAT Min', 'Fwd IAT Total', 'Bwd IAT Total', 'Down/Up Ratio', 'Average Packet Size', 
+    'Avg Fwd Segment Size', 'Avg Bwd Segment Size'
 ]
 
-df = df.drop(columns=[col for col in leaky_features if col in df.columns])
-print(f"Dropped {len([col for col in leaky_features if col in df.columns])} potentially leaky features")
+removed_leaky = [col for col in leaky_features if col in df.columns]
+df = df.drop(columns=removed_leaky)
+results.features_removed.extend(removed_leaky)
+logger.info(f"Removed {len(removed_leaky)} potentially leaky features")
 
 # Drop constant columns
 initial_cols = len(df.columns)
 df = df.loc[:, df.nunique() > 1]
-print(f"Dropped {initial_cols - len(df.columns)} constant columns")
+constant_cols_removed = initial_cols - len(df.columns)
+logger.info(f"Dropped {constant_cols_removed} constant columns")
 
 # === Step 5: Advanced Leakage Detection ===
-print("\n=== Advanced Leakage Detection ===")
+log_section("ADVANCED LEAKAGE DETECTION")
 X_temp = df.drop(columns=['binary_label'])
 y_temp = df['binary_label']
 
-# Check for perfect separators
 perfect_separators = []
 near_perfect_separators = []
 
@@ -64,127 +232,101 @@ for col in X_temp.columns:
     attack_vals = set(X_temp[y_temp == 1][col].unique())
     overlap = benign_vals & attack_vals
     
-    # Perfect separation
     if len(overlap) == 0 and len(benign_vals) > 1 and len(attack_vals) > 1:
         perfect_separators.append(col)
-        print(f"Perfect separator: {col}")
-    
-    # Near-perfect separation (< 5% overlap)
+        logger.info(f"Perfect separator found: {col}")
     elif len(overlap) > 0:
         total_unique = len(benign_vals | attack_vals)
         overlap_ratio = len(overlap) / total_unique
         if overlap_ratio < 0.05:
             near_perfect_separators.append((col, overlap_ratio))
-            print(f"Near-perfect separator: {col} (overlap: {overlap_ratio:.3f})")
-
-# Check statistical separation
-from scipy import stats
-print("\n=== Statistical Separation Analysis ===")
-high_separation_features = []
-for col in X_temp.columns:
-    benign_data = X_temp[y_temp == 0][col]
-    attack_data = X_temp[y_temp == 1][col]
-    
-    # Mann-Whitney U test
-    statistic, p_value = stats.mannwhitneyu(benign_data, attack_data, alternative='two-sided')
-    
-    if p_value < 1e-50:  # Extremely low p-value
-        effect_size = 1 - (2 * statistic) / (len(benign_data) * len(attack_data))
-        high_separation_features.append((col, p_value, abs(effect_size)))
-        print(f"High separation: {col} (p={p_value:.2e}, effect_size={abs(effect_size):.3f})")
+            logger.info(f"Near-perfect separator: {col} (overlap: {overlap_ratio:.3f})")
 
 # Remove problematic features
 problematic_features = perfect_separators + [feat[0] for feat in near_perfect_separators]
 if problematic_features:
     df = df.drop(columns=problematic_features)
-    print(f"\nRemoved {len(problematic_features)} highly separating features: {problematic_features}")
+    results.features_removed.extend(problematic_features)
+    logger.info(f"Removed {len(problematic_features)} highly separating features")
 
-# Show distribution examples for top separating features
-print("\n=== Distribution Analysis of Top Features ===")
-remaining_features = [col for col in X_temp.columns if col not in problematic_features]
-for col in remaining_features[:3]:  # Show top 3 remaining features
-    benign_data = X_temp[y_temp == 0][col]
-    attack_data = X_temp[y_temp == 1][col]
-    print(f"\n{col}:")
-    print(f"  Benign - Mean: {benign_data.mean():.3f}, Std: {benign_data.std():.3f}")
-    print(f"  Attack - Mean: {attack_data.mean():.3f}, Std: {attack_data.std():.3f}")
-    print(f"  Separation: {abs(benign_data.mean() - attack_data.mean()) / (benign_data.std() + attack_data.std()):.3f}")
+# Check for constant attack values
+constant_attack_features = []
+for col in X_temp.columns:
+    if col in df.columns:  # Make sure column still exists
+        attack_vals = X_temp[y_temp == 1][col].unique()
+        if len(attack_vals) == 1:
+            constant_attack_features.append(col)
+            logger.info(f"Constant attack values: {col} = {attack_vals[0]}")
 
-# === Step 6: Features/Target Separation ===
+if constant_attack_features:
+    df = df.drop(columns=constant_attack_features)
+    results.features_removed.extend(constant_attack_features)
+    logger.info(f"Removed {len(constant_attack_features)} constant-attack-value features")
+
+# === Step 6: Final Feature Setup ===
 X = df.drop(columns=['binary_label'])
 y = df['binary_label']
 X.columns = [str(col) for col in X.columns]
+results.final_feature_count = len(X.columns)
 
-print(f"Final feature count: {len(X.columns)}")
-print(f"Remaining features: {list(X.columns)}")
+logger.info(f"Final feature count: {len(X.columns)}")
+logger.info(f"Final features: {list(X.columns)}")
 
-# Save final features list to a file
-with open("models/final_features.txt", "w") as f:
+# Save final features list
+with open("results/final_features.txt", "w") as f:
     for feature in X.columns:
         f.write(feature + "\n")
 
-print("Final feature list saved to 'models/final_features.txt'")
+# === Step 7: Model Training and Evaluation ===
+log_section("MODEL TRAINING AND EVALUATION")
 
-# === Step 7: Temporal Split (More Realistic) ===
-# Sort by index assuming temporal order, or add timestamp-based sorting if available
-print("\n=== Using Temporal Split ===")
-split_idx = int(len(df) * 0.7)  # 70% for training
+# Temporal split
+split_idx = int(len(df) * 0.7)
 X_train_temp = X.iloc[:split_idx]
 X_test_temp = X.iloc[split_idx:]
 y_train_temp = y.iloc[:split_idx]
 y_test_temp = y.iloc[split_idx:]
 
-print(f"Temporal split - Train: {len(X_train_temp)}, Test: {len(X_test_temp)}")
-print(f"Train class distribution: {y_train_temp.value_counts().to_dict()}")
-print(f"Test class distribution: {y_test_temp.value_counts().to_dict()}")
+logger.info(f"Temporal split - Train: {len(X_train_temp)}, Test: {len(X_test_temp)}")
 
-# === Step 8: Feature Scaling ===
+# Feature scaling
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train_temp)
 X_test_scaled = scaler.transform(X_test_temp)
 
-# === Step 9: More Conservative Model ===
-print("\n=== Training Conservative Model ===")
+# Train model
 model = xgb.XGBClassifier(
-    n_estimators=50,        # Reduced from 100
-    max_depth=3,            # Reduced from 6
-    learning_rate=0.05,     # Reduced from 0.1
-    min_child_weight=5,     # Added regularization
-    subsample=0.8,          # Added regularization
-    colsample_bytree=0.8,   # Added regularization
-    reg_alpha=0.1,          # L1 regularization
-    reg_lambda=1.0,         # L2 regularization
-    objective='binary:logistic',
-    eval_metric='logloss',
-    random_state=42
+    n_estimators=50, max_depth=3, learning_rate=0.05,
+    min_child_weight=5, subsample=0.8, colsample_bytree=0.8,
+    reg_alpha=0.1, reg_lambda=1.0, objective='binary:logistic',
+    eval_metric='logloss', random_state=42
 )
 
 model.fit(X_train_scaled, y_train_temp)
 
-# === Step 10: Cross-Validation ===
-print("\n=== Cross-Validation Results ===")
+# Cross-validation
 cv_scores = cross_val_score(model, X_train_scaled, y_train_temp, 
                            cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
                            scoring='roc_auc')
-print(f"CV ROC-AUC scores: {cv_scores}")
-print(f"Mean CV ROC-AUC: {cv_scores.mean():.4f} (+/- {cv_scores.std() * 2:.4f})")
+results.cv_auc_mean = cv_scores.mean()
+results.cv_auc_std = cv_scores.std()
+logger.info(f"CV ROC-AUC: {results.cv_auc_mean:.4f} (+/- {results.cv_auc_std * 2:.4f})")
 
-# === Step 11: Evaluate on Test Set ===
+# Test set evaluation
 y_pred = model.predict(X_test_scaled)
 y_pred_proba = model.predict_proba(X_test_scaled)[:, 1]
+results.temporal_auc = roc_auc_score(y_test_temp, y_pred_proba)
 
-print("\n=== Test Set Results ===")
-print("Confusion Matrix:")
 cm = confusion_matrix(y_test_temp, y_pred)
-print(cm)
+tn, fp, fn, tp = cm.ravel()
+results.false_positive_rate = fp / (fp + tn)
+results.false_negative_rate = fn / (fn + tp)
 
-print("\nClassification Report:")
-print(classification_report(y_test_temp, y_pred))
+logger.info(f"Temporal split AUC: {results.temporal_auc:.4f}")
+logger.info(f"False Positive Rate: {results.false_positive_rate:.4f}")
+logger.info(f"False Negative Rate: {results.false_negative_rate:.4f}")
 
-print(f"ROC-AUC Score: {roc_auc_score(y_test_temp, y_pred_proba):.4f}")
-
-# === Step 12: Random Split Comparison ===
-print("\n=== Comparison: Random Split Results ===")
+# Random split comparison
 X_train_rand, X_test_rand, y_train_rand, y_test_rand = train_test_split(
     X, y, test_size=0.3, random_state=42, stratify=y
 )
@@ -200,143 +342,90 @@ model_rand = xgb.XGBClassifier(
 )
 
 model_rand.fit(X_train_rand_scaled, y_train_rand)
-y_pred_rand = model_rand.predict(X_test_rand_scaled)
 y_pred_rand_proba = model_rand.predict_proba(X_test_rand_scaled)[:, 1]
+results.random_auc = roc_auc_score(y_test_rand, y_pred_rand_proba)
 
-print("Random Split Confusion Matrix:")
-print(confusion_matrix(y_test_rand, y_pred_rand))
-print(f"Random Split ROC-AUC: {roc_auc_score(y_test_rand, y_pred_rand_proba):.4f}")
+logger.info(f"Random split AUC: {results.random_auc:.4f}")
 
-# === Step 13: Feature Importance Analysis ===
-print("\n=== Feature Importance Analysis ===")
+# Feature importance
 feature_importance = pd.DataFrame({
     'feature': X.columns,
     'importance': model.feature_importances_
 }).sort_values('importance', ascending=False)
 
-print("Top 10 Most Important Features:")
-print(feature_importance.head(10))
+results.top_features = list(zip(feature_importance['feature'].head(10), 
+                               feature_importance['importance'].head(10)))
 
-# Plot feature importance
-plt.figure(figsize=(10, 6))
-plt.subplot(1, 2, 1)
-xgb.plot_importance(model, max_num_features=10, height=0.4)
-plt.title("Temporal Split - Feature Importance")
+logger.info("Top 10 feature importances:")
+for feature, importance in results.top_features:
+    logger.info(f"  {feature}: {importance:.4f}")
 
-plt.subplot(1, 2, 2)
-xgb.plot_importance(model_rand, max_num_features=10, height=0.4)
-plt.title("Random Split - Feature Importance")
+# Create and save plots
+plt.figure(figsize=(15, 10))
+
+# Plot 1: Feature importance
+plt.subplot(2, 2, 1)
+top_features_df = feature_importance.head(10)
+plt.barh(range(len(top_features_df)), top_features_df['importance'])
+plt.yticks(range(len(top_features_df)), top_features_df['feature'])
+plt.xlabel('Importance')
+plt.title('Top 10 Feature Importance')
+plt.gca().invert_yaxis()
+
+# Plot 2: Confusion Matrix
+plt.subplot(2, 2, 2)
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+            xticklabels=['Benign', 'Attack'], yticklabels=['Benign', 'Attack'])
+plt.title('Confusion Matrix (Temporal Split)')
+plt.ylabel('Actual')
+plt.xlabel('Predicted')
+
+# Plot 3: Class distribution
+plt.subplot(2, 2, 3)
+class_counts = list(results.class_distribution.values())
+class_labels = ['Benign', 'Attack']
+plt.pie(class_counts, labels=class_labels, autopct='%1.1f%%', startangle=90)
+plt.title('Class Distribution')
+
+# Plot 4: AUC comparison
+plt.subplot(2, 2, 4)
+splits = ['Temporal', 'Random']
+aucs = [results.temporal_auc, results.random_auc]
+plt.bar(splits, aucs, color=['skyblue', 'lightcoral'])
+plt.ylabel('AUC Score')
+plt.title('AUC Comparison: Temporal vs Random Split')
+plt.ylim(0, 1)
 
 plt.tight_layout()
-plt.show()
+plt.savefig(f'plots/ddos_analysis_{timestamp}.png', dpi=300, bbox_inches='tight')
+plt.close()
 
-# === Step 14: Distribution Analysis ===
-print("\n=== Class Distribution Analysis ===")
-print("Overall class distribution:")
-print(y.value_counts())
-print(f"Class balance ratio: {y.value_counts()[0] / y.value_counts()[1]:.2f}")
-
-# === Step 15: Deep Dataset Analysis ===
-print("\n=== Deep Dataset Analysis ===")
-
-# Check if we have a realistic dataset left
-if len(X.columns) < 5:
-    print("WARNING: Too few features remaining. Dataset may be fundamentally flawed.")
-    
-# Analyze actual feature values for top important features
-print("\n=== Top Feature Value Analysis ===")
-for i, (feat, imp) in enumerate(feature_importance.head(5).values):
-    print(f"\n{i+1}. {feat} (importance: {imp:.3f})")
-    
-    # Show value distributions
-    benign_vals = X_temp[y_temp == 0][feat]
-    attack_vals = X_temp[y_temp == 1][feat]
-    
-    print(f"   Benign values range: {benign_vals.min():.3f} to {benign_vals.max():.3f}")
-    print(f"   Attack values range: {attack_vals.min():.3f} to {attack_vals.max():.3f}")
-    
-    # Check for clear thresholds
-    threshold_candidates = [benign_vals.max(), attack_vals.min(), 
-                          benign_vals.mean(), attack_vals.mean()]
-    
-    for threshold in threshold_candidates:
-        benign_below = (benign_vals <= threshold).sum()
-        attack_above = (attack_vals > threshold).sum()
-        accuracy = (benign_below + attack_above) / len(y_temp)
-        if accuracy > 0.95:
-            print(f"   Threshold {threshold:.3f} achieves {accuracy:.3f} accuracy")
-
-# === Step 16: Save Trained Pipeline ===
-joblib.dump(scaler, "models/ddos_scaler.pkl")
+# Save models
+joblib.dump(scaler, "models/ddos_scaler_xgb.pkl")
 joblib.dump(model_rand, "models/ddos_xgb_model.pkl")
 
-print("â Saved trained scaler and model to disk.")
+# Generate recommendations
+results.recommendations = [
+    "Model shows realistic performance with meaningful trade-offs",
+    "Consider ensemble methods (Random Forest + XGBoost) for improvement",
+    "Tune decision threshold to optimize precision/recall balance",
+    "Test on different DDoS attack types for robustness",
+    "Consider anomaly detection for unknown attack variants",
+    "Add domain knowledge features (burst patterns, flow duration bins)",
+    "Monitor model performance in production environment"
+]
 
-# Final reality check
-print(f"\n=== Final Reality Check ===")
-print(f"If this were a real-world deployment:")
-print(f"- False Positive Rate: {62/40873:.4f} ({62} benign flows flagged as attacks)")
-print(f"- False Negative Rate: {68/26841:.4f} ({68} attacks missed)")
-print(f"- This means missing 1 in {26841//68} DDoS attacks")
-print(f"- And falsely alerting on 1 in {40873//62} benign flows")
-print(f"\nThese rates are unrealistically low for cybersecurity detection.")
+# Create PDF report
+pdf_file = create_pdf_report()
+logger.info(f"PDF report saved to: {pdf_file}")
 
-# Check for constant attack values (another type of leakage)
-print(f"\n=== Checking for Constant Attack Values ===")
-constant_attack_features = []
-for col in X.columns:
-    attack_vals = X_temp[y_temp == 1][col].unique()
-    if len(attack_vals) == 1:
-        constant_attack_features.append(col)
-        print(f"Constant attack values: {col} = {attack_vals[0]}")
+log_section("ANALYSIS COMPLETE")
+logger.info("All outputs saved:")
+logger.info(f"- Detailed log: {log_filename}")
+logger.info(f"- PDF report: {pdf_file}")
+logger.info(f"- Feature list: results/final_features.txt")
+logger.info(f"- Visualization: plots/ddos_analysis_{timestamp}.png")
+logger.info("- Models: models/ddos_scaler.pkl, models/ddos_xgb_model.pkl")
 
-# Remove features with constant attack values
-if constant_attack_features:
-    df = df.drop(columns=constant_attack_features)
-    print(f"Removed {len(constant_attack_features)} constant-attack-value features")
-    
-    # Retrain with cleaner features
-    X_clean = df.drop(columns=['binary_label'])
-    y_clean = df['binary_label']
-    
-    print(f"Final clean feature count: {len(X_clean.columns)}")
-    print(f"Clean features: {list(X_clean.columns)}")
-    
-    # Re-run the model with truly clean features
-    split_idx = int(len(df) * 0.7)
-    X_train_clean = X_clean.iloc[:split_idx]
-    X_test_clean = X_clean.iloc[split_idx:]
-    y_train_clean = y_clean.iloc[:split_idx]
-    y_test_clean = y_clean.iloc[split_idx:]
-    
-    X_train_clean_scaled = scaler.fit_transform(X_train_clean)
-    X_test_clean_scaled = scaler.transform(X_test_clean)
-    
-    model_clean = xgb.XGBClassifier(
-        n_estimators=50, max_depth=3, learning_rate=0.05,
-        min_child_weight=5, subsample=0.8, colsample_bytree=0.8,
-        reg_alpha=0.1, reg_lambda=1.0, objective='binary:logistic',
-        eval_metric='logloss', random_state=42
-    )
-    
-    model_clean.fit(X_train_clean_scaled, y_train_clean)
-    y_pred_clean = model_clean.predict(X_test_clean_scaled)
-    y_pred_clean_proba = model_clean.predict_proba(X_test_clean_scaled)[:, 1]
-    
-    print(f"\n=== FINAL CLEAN MODEL RESULTS ===")
-    print("Confusion Matrix:")
-    print(confusion_matrix(y_test_clean, y_pred_clean))
-    print("\nClassification Report:")
-    print(classification_report(y_test_clean, y_pred_clean))
-    print(f"ROC-AUC Score: {roc_auc_score(y_test_clean, y_pred_clean_proba):.4f}")
-
-# Suggest next steps
-print(f"\n=== Final Recommendations ===")
-print("â SUCCESS: You now have a realistic DDoS detection model!")
-print("ð 82% accuracy with meaningful trade-offs is actually excellent")
-print("ð¯ Next steps for improvement:")
-print("1. Tune the decision threshold to balance precision/recall")
-print("2. Try ensemble methods (Random Forest + XGBoost)")
-print("3. Add domain knowledge features (burst patterns, flow duration bins)")
-print("4. Test on different DDoS attack types")
-print("5. Consider anomaly detection for unknown attack variants")
+# Print executive summary to console
+print_executive_summary()

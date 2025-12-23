@@ -1,0 +1,85 @@
+2025-12-23 15:37:30,683 - INFO - ==================================================
+2025-12-23 15:37:30,684 - INFO -  STARTING DDOS DETECTION ANALYSIS
+2025-12-23 15:37:30,684 - INFO - ==================================================
+2025-12-23 15:37:30,684 - INFO - Loading dataset...
+2025-12-23 15:37:31,090 - INFO - Loaded dataset: (225745, 79)
+2025-12-23 15:37:31,090 - INFO - Cleaning data...
+2025-12-23 15:37:31,146 - INFO - Dataset shape after cleaning: (225711, 79)
+2025-12-23 15:37:31,175 - INFO - Class distribution: {1: 128025, 0: 97686}
+2025-12-23 15:37:31,175 - INFO - ==================================================
+2025-12-23 15:37:31,175 - INFO -  FEATURE CLEANING
+2025-12-23 15:37:31,175 - INFO - ==================================================
+2025-12-23 15:37:31,192 - INFO - Removed 23 potentially leaky features
+2025-12-23 15:37:31,240 - INFO - Dropped 10 constant columns
+2025-12-23 15:37:31,240 - INFO - ==================================================
+2025-12-23 15:37:31,240 - INFO -  ADVANCED LEAKAGE DETECTION
+2025-12-23 15:37:31,240 - INFO - ==================================================
+2025-12-23 15:37:31,257 - INFO - Near-perfect separator: Destination Port (overlap: 0.000)
+2025-12-23 15:37:31,266 - INFO - Near-perfect separator: Fwd Packet Length Max (overlap: 0.001)
+2025-12-23 15:37:31,275 - INFO - Near-perfect separator: Fwd Packet Length Min (overlap: 0.013)
+2025-12-23 15:37:31,284 - INFO - Near-perfect separator: Fwd Packet Length Mean (overlap: 0.001)
+2025-12-23 15:37:31,298 - INFO - Near-perfect separator: Fwd Packet Length Std (overlap: 0.001)
+2025-12-23 15:37:31,309 - INFO - Near-perfect separator: Bwd Packet Length Max (overlap: 0.005)
+2025-12-23 15:37:31,319 - INFO - Near-perfect separator: Bwd Packet Length Min (overlap: 0.009)
+2025-12-23 15:37:31,331 - INFO - Near-perfect separator: Bwd Packet Length Mean (overlap: 0.000)
+2025-12-23 15:37:31,344 - INFO - Near-perfect separator: Bwd Packet Length Std (overlap: 0.000)
+2025-12-23 15:37:31,364 - INFO - Near-perfect separator: Fwd IAT Mean (overlap: 0.019)
+2025-12-23 15:37:31,382 - INFO - Near-perfect separator: Fwd IAT Std (overlap: 0.013)
+2025-12-23 15:37:31,402 - INFO - Near-perfect separator: Fwd IAT Max (overlap: 0.035)
+2025-12-23 15:37:31,432 - INFO - Near-perfect separator: Bwd IAT Mean (overlap: 0.004)
+2025-12-23 15:37:31,451 - INFO - Near-perfect separator: Bwd IAT Std (overlap: 0.000)
+2025-12-23 15:37:31,471 - INFO - Near-perfect separator: Bwd IAT Max (overlap: 0.011)
+2025-12-23 15:37:31,501 - INFO - Near-perfect separator: Min Packet Length (overlap: 0.018)
+2025-12-23 15:37:31,509 - INFO - Near-perfect separator: Max Packet Length (overlap: 0.006)
+2025-12-23 15:37:31,519 - INFO - Near-perfect separator: Packet Length Mean (overlap: 0.003)
+2025-12-23 15:37:31,529 - INFO - Near-perfect separator: Packet Length Std (overlap: 0.011)
+2025-12-23 15:37:31,540 - INFO - Near-perfect separator: Packet Length Variance (overlap: 0.011)
+2025-12-23 15:37:31,604 - INFO - Near-perfect separator: Fwd Header Length.1 (overlap: 0.031)
+2025-12-23 15:37:31,612 - INFO - Near-perfect separator: Subflow Fwd Packets (overlap: 0.037)
+2025-12-23 15:37:31,621 - INFO - Near-perfect separator: Subflow Fwd Bytes (overlap: 0.004)
+2025-12-23 15:37:31,631 - INFO - Near-perfect separator: Subflow Bwd Packets (overlap: 0.025)
+2025-12-23 15:37:31,642 - INFO - Near-perfect separator: Subflow Bwd Bytes (overlap: 0.001)
+2025-12-23 15:37:31,652 - INFO - Near-perfect separator: act_data_pkt_fwd (overlap: 0.043)
+2025-12-23 15:37:31,673 - INFO - Near-perfect separator: Active Mean (overlap: 0.011)
+2025-12-23 15:37:31,683 - INFO - Near-perfect separator: Active Std (overlap: 0.000)
+2025-12-23 15:37:31,696 - INFO - Near-perfect separator: Active Max (overlap: 0.011)
+2025-12-23 15:37:31,708 - INFO - Near-perfect separator: Active Min (overlap: 0.014)
+2025-12-23 15:37:31,720 - INFO - Near-perfect separator: Idle Mean (overlap: 0.019)
+2025-12-23 15:37:31,746 - INFO - Near-perfect separator: Idle Max (overlap: 0.019)
+2025-12-23 15:37:31,761 - INFO - Near-perfect separator: Idle Min (overlap: 0.013)
+2025-12-23 15:37:31,765 - INFO - Removed 33 highly separating features
+2025-12-23 15:37:31,781 - INFO - Constant attack values: Fwd PSH Flags = 0
+2025-12-23 15:37:31,790 - INFO - Constant attack values: SYN Flag Count = 0
+2025-12-23 15:37:31,795 - INFO - Constant attack values: RST Flag Count = 0
+2025-12-23 15:37:31,814 - INFO - Constant attack values: ECE Flag Count = 0
+2025-12-23 15:37:31,818 - INFO - Constant attack values: min_seg_size_forward = 20
+2025-12-23 15:37:31,824 - INFO - Removed 5 constant-attack-value features
+2025-12-23 15:37:31,825 - INFO - Final feature count: 7
+2025-12-23 15:37:31,825 - INFO - Final features: ['Fwd IAT Min', 'Bwd IAT Min', 'FIN Flag Count', 'PSH Flag Count', 'ACK Flag Count', 'URG Flag Count', 'Idle Std']
+2025-12-23 15:37:31,825 - INFO - ==================================================
+2025-12-23 15:37:31,825 - INFO -  MODEL TRAINING AND EVALUATION
+2025-12-23 15:37:31,825 - INFO - ==================================================
+2025-12-23 15:37:31,825 - INFO - Temporal split - Train: 157997, Test: 67714
+2025-12-23 15:37:32,360 - INFO - CV ROC-AUC: 0.9497 (+/- 0.0041)
+2025-12-23 15:37:32,369 - INFO - Temporal split AUC: 0.9232
+2025-12-23 15:37:32,370 - INFO - False Positive Rate: 0.3153
+2025-12-23 15:37:32,370 - INFO - False Negative Rate: 0.0011
+2025-12-23 15:37:32,502 - INFO - Random split AUC: 0.9415
+2025-12-23 15:37:32,504 - INFO - Top 10 feature importances:
+2025-12-23 15:37:32,504 - INFO -   URG Flag Count: 0.4083
+2025-12-23 15:37:32,504 - INFO -   PSH Flag Count: 0.2969
+2025-12-23 15:37:32,504 - INFO -   ACK Flag Count: 0.1469
+2025-12-23 15:37:32,504 - INFO -   Fwd IAT Min: 0.0642
+2025-12-23 15:37:32,504 - INFO -   Idle Std: 0.0456
+2025-12-23 15:37:32,504 - INFO -   Bwd IAT Min: 0.0382
+2025-12-23 15:37:32,504 - INFO -   FIN Flag Count: 0.0000
+2025-12-23 15:37:32,845 - INFO - PDF report saved to: results/ddos_analysis_report_20251223_153730.pdf
+2025-12-23 15:37:32,845 - INFO - ==================================================
+2025-12-23 15:37:32,845 - INFO -  ANALYSIS COMPLETE
+2025-12-23 15:37:32,845 - INFO - ==================================================
+2025-12-23 15:37:32,845 - INFO - All outputs saved:
+2025-12-23 15:37:32,845 - INFO - - Detailed log: results/ddos_analysis_20251223_153730.log
+2025-12-23 15:37:32,845 - INFO - - PDF report: results/ddos_analysis_report_20251223_153730.pdf
+2025-12-23 15:37:32,845 - INFO - - Feature list: results/final_features.txt
+2025-12-23 15:37:32,845 - INFO - - Visualization: plots/ddos_analysis_20251223_153730.png
+2025-12-23 15:37:32,845 - INFO - - Models: models/ddos_scaler.pkl, models/ddos_xgb_model.pkl

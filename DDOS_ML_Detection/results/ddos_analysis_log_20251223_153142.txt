@@ -1,0 +1,297 @@
+=== DDoS Detection Model Analysis ===
+Analysis started at: 2025-12-23 15:31:42.856181
+
+=== Step 1: Data Loading ===
+Loaded dataset from: /Users/eligius/Projects/ml/Anomalous_Inbound_BytesML/Cyber-ML-Detections/MachineLearningCVE/Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+Initial dataset shape: (225745, 79)
+
+=== Step 2: Data Cleaning ===
+Rows before cleaning: 225745
+Rows after cleaning: 225711
+Rows removed: 34
+Dataset shape after cleaning: (225711, 79)
+
+=== Step 3: Binary Labeling ===
+Benign samples: 97686
+Attack samples: 128025
+Class balance ratio (Benign/Attack): 0.76
+
+=== Step 4: Remove Leaky Features ===
+Potentially leaky features identified: 23
+Actually dropped: 23
+Dropped features:
+  - Flow Bytes/s
+  - Flow Packets/s
+  - Init_Win_bytes_backward
+  - Init_Win_bytes_forward
+  - Fwd Header Length
+  - Bwd Header Length
+  - Flow Duration
+  - Total Fwd Packets
+  - Total Backward Packets
+  - Total Length of Fwd Packets
+  - Total Length of Bwd Packets
+  - Fwd Packets/s
+  - Bwd Packets/s
+  - Flow IAT Mean
+  - Flow IAT Std
+  - Flow IAT Max
+  - Flow IAT Min
+  - Fwd IAT Total
+  - Bwd IAT Total
+  - Down/Up Ratio
+  - Average Packet Size
+  - Avg Fwd Segment Size
+  - Avg Bwd Segment Size
+
+Constant columns dropped: 10
+
+=== Step 5: Advanced Leakage Detection ===
+Near-perfect separator: Destination Port (overlap: 0.000)
+Near-perfect separator: Fwd Packet Length Max (overlap: 0.001)
+Near-perfect separator: Fwd Packet Length Min (overlap: 0.013)
+Near-perfect separator: Fwd Packet Length Mean (overlap: 0.001)
+Near-perfect separator: Fwd Packet Length Std (overlap: 0.001)
+Near-perfect separator: Bwd Packet Length Max (overlap: 0.005)
+Near-perfect separator: Bwd Packet Length Min (overlap: 0.009)
+Near-perfect separator: Bwd Packet Length Mean (overlap: 0.000)
+Near-perfect separator: Bwd Packet Length Std (overlap: 0.000)
+Near-perfect separator: Fwd IAT Mean (overlap: 0.019)
+Near-perfect separator: Fwd IAT Std (overlap: 0.013)
+Near-perfect separator: Fwd IAT Max (overlap: 0.035)
+Near-perfect separator: Bwd IAT Mean (overlap: 0.004)
+Near-perfect separator: Bwd IAT Std (overlap: 0.000)
+Near-perfect separator: Bwd IAT Max (overlap: 0.011)
+Near-perfect separator: Min Packet Length (overlap: 0.018)
+Near-perfect separator: Max Packet Length (overlap: 0.006)
+Near-perfect separator: Packet Length Mean (overlap: 0.003)
+Near-perfect separator: Packet Length Std (overlap: 0.011)
+Near-perfect separator: Packet Length Variance (overlap: 0.011)
+Near-perfect separator: Fwd Header Length.1 (overlap: 0.031)
+Near-perfect separator: Subflow Fwd Packets (overlap: 0.037)
+Near-perfect separator: Subflow Fwd Bytes (overlap: 0.004)
+Near-perfect separator: Subflow Bwd Packets (overlap: 0.025)
+Near-perfect separator: Subflow Bwd Bytes (overlap: 0.001)
+Near-perfect separator: act_data_pkt_fwd (overlap: 0.043)
+Near-perfect separator: Active Mean (overlap: 0.011)
+Near-perfect separator: Active Std (overlap: 0.000)
+Near-perfect separator: Active Max (overlap: 0.011)
+Near-perfect separator: Active Min (overlap: 0.014)
+Near-perfect separator: Idle Mean (overlap: 0.019)
+Near-perfect separator: Idle Max (overlap: 0.019)
+Near-perfect separator: Idle Min (overlap: 0.013)
+
+Statistical Separation Analysis:
+High separation: Destination Port (p=0.00e+00, effect_size=0.243)
+High separation: Fwd Packet Length Max (p=0.00e+00, effect_size=0.495)
+High separation: Fwd Packet Length Min (p=0.00e+00, effect_size=0.404)
+High separation: Fwd Packet Length Mean (p=0.00e+00, effect_size=0.491)
+High separation: Fwd Packet Length Std (p=2.88e-275, effect_size=0.081)
+High separation: Bwd Packet Length Max (p=0.00e+00, effect_size=0.320)
+High separation: Bwd Packet Length Min (p=0.00e+00, effect_size=0.594)
+High separation: Bwd Packet Length Mean (p=0.00e+00, effect_size=0.320)
+High separation: Bwd Packet Length Std (p=0.00e+00, effect_size=0.513)
+High separation: Fwd IAT Mean (p=0.00e+00, effect_size=0.482)
+High separation: Fwd IAT Std (p=0.00e+00, effect_size=0.518)
+High separation: Fwd IAT Max (p=0.00e+00, effect_size=0.486)
+High separation: Fwd IAT Min (p=0.00e+00, effect_size=0.292)
+High separation: Bwd IAT Mean (p=0.00e+00, effect_size=0.101)
+High separation: Bwd IAT Max (p=0.00e+00, effect_size=0.103)
+High separation: Bwd IAT Min (p=4.25e-290, effect_size=0.088)
+High separation: Fwd PSH Flags (p=0.00e+00, effect_size=0.077)
+High separation: Min Packet Length (p=0.00e+00, effect_size=0.355)
+High separation: Max Packet Length (p=0.00e+00, effect_size=0.303)
+High separation: Packet Length Mean (p=0.00e+00, effect_size=0.346)
+High separation: Packet Length Std (p=0.00e+00, effect_size=0.304)
+High separation: Packet Length Variance (p=0.00e+00, effect_size=0.304)
+High separation: FIN Flag Count (p=8.69e-147, effect_size=0.006)
+High separation: SYN Flag Count (p=0.00e+00, effect_size=0.077)
+High separation: PSH Flag Count (p=0.00e+00, effect_size=0.239)
+High separation: ACK Flag Count (p=0.00e+00, effect_size=0.098)
+High separation: URG Flag Count (p=0.00e+00, effect_size=0.325)
+High separation: Fwd Header Length.1 (p=0.00e+00, effect_size=0.363)
+High separation: Subflow Fwd Packets (p=0.00e+00, effect_size=0.424)
+High separation: Subflow Fwd Bytes (p=0.00e+00, effect_size=0.374)
+High separation: Subflow Bwd Packets (p=0.00e+00, effect_size=0.098)
+High separation: Subflow Bwd Bytes (p=0.00e+00, effect_size=0.286)
+High separation: act_data_pkt_fwd (p=0.00e+00, effect_size=0.487)
+High separation: min_seg_size_forward (p=0.00e+00, effect_size=0.272)
+High separation: Active Std (p=0.00e+00, effect_size=0.058)
+High separation: Idle Mean (p=0.00e+00, effect_size=0.103)
+High separation: Idle Max (p=0.00e+00, effect_size=0.105)
+High separation: Idle Min (p=0.00e+00, effect_size=0.100)
+
+Removed 33 highly separating features:
+  - Destination Port
+  - Fwd Packet Length Max
+  - Fwd Packet Length Min
+  - Fwd Packet Length Mean
+  - Fwd Packet Length Std
+  - Bwd Packet Length Max
+  - Bwd Packet Length Min
+  - Bwd Packet Length Mean
+  - Bwd Packet Length Std
+  - Fwd IAT Mean
+  - Fwd IAT Std
+  - Fwd IAT Max
+  - Bwd IAT Mean
+  - Bwd IAT Std
+  - Bwd IAT Max
+  - Min Packet Length
+  - Max Packet Length
+  - Packet Length Mean
+  - Packet Length Std
+  - Packet Length Variance
+  - Fwd Header Length.1
+  - Subflow Fwd Packets
+  - Subflow Fwd Bytes
+  - Subflow Bwd Packets
+  - Subflow Bwd Bytes
+  - act_data_pkt_fwd
+  - Active Mean
+  - Active Std
+  - Active Max
+  - Active Min
+  - Idle Mean
+  - Idle Max
+  - Idle Min
+
+Distribution Analysis of Top Features:
+
+Fwd IAT Min:
+  Benign - Mean: 475745.695, Std: 5753878.990
+  Attack - Mean: 2647.980, Std: 199360.532
+  Separation Score: 0.079
+
+Bwd IAT Min:
+  Benign - Mean: 521661.654, Std: 6097389.831
+  Attack - Mean: 78.575, Std: 696.102
+  Separation Score: 0.086
+
+Fwd PSH Flags:
+  Benign - Mean: 0.077, Std: 0.266
+  Attack - Mean: 0.000, Std: 0.000
+  Separation Score: 0.288
+
+=== Step 6: Final Feature Set ===
+Final feature count: 12
+Remaining features:
+  1. Fwd IAT Min
+  2. Bwd IAT Min
+  3. Fwd PSH Flags
+  4. FIN Flag Count
+  5. SYN Flag Count
+  6. RST Flag Count
+  7. PSH Flag Count
+  8. ACK Flag Count
+  9. URG Flag Count
+  10. ECE Flag Count
+  11. min_seg_size_forward
+  12. Idle Std
+
+Final feature list saved to 'models/final_features.txt'
+
+=== Step 7: Temporal Split ===
+Temporal split - Train: 157997, Test: 67714
+Train class distribution: Benign=56813, Attack=101184
+Test class distribution: Benign=40873, Attack=26841
+
+=== Step 8: Feature Scaling and Data Preparation ===
+Features scaled using StandardScaler
+Batch size: 64
+
+=== Step 9: Neural Network Architecture ===
+Input dimension: 12
+Architecture: 12 -> 64 -> 32 -> 1
+Activation: ReLU
+Dropout: 0.3, 0.2
+Output activation: Sigmoid
+Loss function: Binary Cross Entropy
+Optimizer: Adam (lr=0.001, weight_decay=1e-5)
+
+=== Step 10: Training Neural Network ===
+Epoch 10/50 - Loss: 0.1918
+Epoch 20/50 - Loss: 0.1876
+Epoch 30/50 - Loss: 0.1854
+Epoch 40/50 - Loss: 0.1836
+Epoch 50/50 - Loss: 0.1839
+Training completed. Loss plot saved to 'plots/training_loss.png'
+Final training loss: 0.1839
+
+=== Step 11: Cross-Validation Results ===
+5-Fold Cross-Validation ROC-AUC scores:
+  Fold 1: 0.8888
+  Fold 2: 0.8774
+  Fold 3: 0.9214
+  Fold 4: 0.9321
+  Fold 5: 0.9454
+Mean CV ROC-AUC: 0.9130 (+/- 0.0517)
+
+=== Step 12: Test Set Results ===
+Confusion Matrix:
+                Predicted
+Actual    Benign  Attack
+Benign     30902    9971
+Attack       101   26740
+
+Classification Report:
+              precision    recall  f1-score   support
+      Benign      1.00      0.76      0.86      40873
+      Attack      0.73      1.00      0.84      26841
+    accuracy                          0.85      67714
+   macro avg      0.86      0.88      0.85      67714
+weighted avg      0.89      0.85      0.85      67714
+
+ROC-AUC Score: 0.9144
+
+=== Step 13: Random Split Comparison ===
+Random Split Confusion Matrix:
+                Predicted
+Actual    Benign  Attack
+Benign     22761    6545
+Attack        10   38398
+Random Split ROC-AUC: 0.9087
+
+=== Step 14: Constant Attack Values Analysis ===
+Constant attack values: Fwd PSH Flags = 0
+Constant attack values: SYN Flag Count = 0
+Constant attack values: RST Flag Count = 0
+Constant attack values: ECE Flag Count = 0
+Constant attack values: min_seg_size_forward = 20
+
+=== Step 15: Final Reality Check ===
+Real-world deployment implications:
+- False Positive Rate: 0.2440 (9971 benign flows flagged as attacks)
+- False Negative Rate: 0.0038 (101 attacks missed)
+- This means missing 1 in 265 DDoS attacks
+- And falsely alerting on 1 in 4 benign flows
+
+=== Step 16: Model Saving ===
+Saved files:
+- models/ddos_scaler.pkl
+- models/ddos_torch_model.pt
+- models/ddos_model_info.pkl
+
+=== Final Recommendations ===
+✅ SUCCESS: PyTorch-based DDoS detection model completed!
+📊 Neural network performance with meaningful trade-offs achieved
+
+🎯 Next steps for improvement:
+1. Tune the decision threshold to balance precision/recall
+2. Try different neural network architectures (deeper/wider networks)
+3. Implement early stopping and learning rate scheduling
+4. Add domain knowledge features (burst patterns, flow duration bins)
+5. Test on different DDoS attack types
+6. Consider ensemble methods combining multiple neural networks
+7. Experiment with other PyTorch optimizers (SGD, RMSprop)
+8. Add regularization techniques (batch normalization, different dropout rates)
+
+Analysis completed at: 2025-12-23 15:32:39.480329
+
+📊 PDF report generated: results/ddos_analysis_report_20251223_153142.pdf
+
+📁 All outputs saved to:
+  - Log file: results/ddos_analysis_log_20251223_153142.txt
+  - Models: models/ directory
+  - Plots: plots/ directory
+  - PDF report: results/ddos_analysis_report_20251223_153142.pdf

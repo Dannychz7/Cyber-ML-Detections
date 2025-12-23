@@ -40,7 +40,7 @@ def main(input_csv):
         model.load_state_dict(torch.load("models/ddos_torch_model.pt"))
         model.eval()  # Set to evaluation mode
         
-        print("✅ PyTorch model loaded successfully")
+        print(" PyTorch model loaded successfully")
         
     except FileNotFoundError as e:
         print(f"ERROR: Model files not found. Make sure you've trained the model first.")
@@ -53,7 +53,7 @@ def main(input_csv):
     # Load input data
     try:
         df = pd.read_csv(input_csv, on_bad_lines='warn')
-        print(f"✅ Loaded input data: {df.shape}")
+        print(f" Loaded input data: {df.shape}")
         print(f"Input data columns: {list(df.columns)}")
         
         # Clean column names (remove leading/trailing spaces)
@@ -72,19 +72,24 @@ def main(input_csv):
 
     # Select features in correct order
     X = df[expected_features]
-    print(f"✅ Selected {X.shape[1]} features for prediction")
+    print(f" Selected {X.shape[1]} features for prediction")
 
     # Handle missing values and infinite values
     X = X.replace([np.inf, -np.inf], np.nan)
     if X.isnull().any().any():
-        print("⚠️  Warning: Found missing/infinite values, filling with 0")
+        print("  Warning: Found missing/infinite values, filling with 0")
         X = X.fillna(0)
 
     try:
         # Load and apply scaler
-        scaler = joblib.load("models/ddos_scaler.pkl")
-        X_scaled = scaler.transform(X)
-        print("✅ Applied feature scaling")
+        try:
+            # Use the specific scaler file, not the info file
+            scaler = joblib.load("models/ddos_scaler.pkl") 
+            X_scaled = scaler.transform(X)
+            print(" Applied feature scaling")
+        except FileNotFoundError:
+            print("WARNING: models/ddos_scaler.pkl not found, using unscaled features")
+            X_scaled = X.values
         
     except FileNotFoundError:
         print("WARNING: Scaler not found, using unscaled features")
@@ -108,12 +113,12 @@ def main(input_csv):
             # Convert to more interpretable labels
             y_pred_labels = ['ATTACK' if pred == 1 else 'BENIGN' for pred in y_pred]
         
-        print(f"✅ Generated predictions for {len(y_pred)} samples")
+        print(f" Generated predictions for {len(y_pred)} samples")
         
         # Print prediction summary
         attack_count = np.sum(y_pred)
         benign_count = len(y_pred) - attack_count
-        print(f"📊 Prediction Summary:")
+        print(f" Prediction Summary:")
         print(f"   - BENIGN: {benign_count} ({benign_count/len(y_pred)*100:.1f}%)")
         print(f"   - ATTACK: {attack_count} ({attack_count/len(y_pred)*100:.1f}%)")
         
@@ -135,7 +140,7 @@ def main(input_csv):
     output_csv = input_csv.replace(".csv", "_predictions.csv")
     try:
         df.to_csv(output_csv, index=False)
-        print(f"✅ Predictions saved to: {output_csv}")
+        print(f" Predictions saved to: {output_csv}")
         
         # Save summary statistics
         summary_csv = input_csv.replace(".csv", "_prediction_summary.csv")
@@ -146,14 +151,14 @@ def main(input_csv):
                      np.mean(df['confidence']), high_confidence]
         })
         summary_df.to_csv(summary_csv, index=False)
-        print(f"✅ Summary saved to: {summary_csv}")
+        print(f" Summary saved to: {summary_csv}")
         
     except Exception as e:
         print(f"ERROR saving results: {e}")
         sys.exit(1)
 
     # Show sample predictions
-    print(f"\n📋 Sample Predictions (first 10 rows):")
+    print(f"\n Sample Predictions (first 10 rows):")
     sample_cols = ['predicted_label', 'predicted_prob', 'confidence']
     if 'Label' in df.columns:  # If ground truth is available
         sample_cols = ['Label'] + sample_cols
@@ -171,5 +176,5 @@ if __name__ == "__main__":
         sys.exit(1)
 
     input_csv = sys.argv[1]
-    print(f"🚀 Starting DDoS prediction on: {input_csv}")
+    print(f" Starting DDoS prediction on: {input_csv}")
     main(input_csv)

@@ -2,5 +2,5 @@ Metric,Value
 Total Samples,9.0
 Benign Predictions,4.0
 Attack Predictions,5.0
-Avg Confidence,0.9712258577346802
+Avg Confidence,0.968651533126831
 High Confidence Count,9.0
