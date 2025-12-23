@@ -1,46 +1,52 @@
 # Cyber-ML-Detections
 
-Welcome to my repo where I will be making some proof-of-concept Machine Learning detection tools.
+Welcome to my repository for proof-of-concept Machine Learning detection tools focused on cyber threat detection.
 
-## 📁 Project Overview
+## Project Overview
 
-This repository contains various machine learning models and scripts focused on detecting cyber threats using real network traffic datasets. The goal is to explore the feasibility and effectiveness of ML-based detection methods.
+This repository contains various machine learning models and scripts for detecting cyber threats using real network traffic datasets. The goal is to explore the feasibility and effectiveness of ML-based detection methods.
 
-## 🔧 Features
+## Features
 
 - XGBoost and PyTorch implementations
 - Network traffic feature extraction and preprocessing
 - Sample prediction pipelines
 - Custom model training and evaluation
 
-## 🗂 Structure
-
+## Repository Structure
+```
 Cyber-ML-Detections/
-├── DDOS_ML_Detection/ # Models and scripts for DDoS detection using both XGBoost and PyTorch
-|-- Anamolous_Inbound_Traffic_Logs/ # UNDER DEV, this will be similar to DDOS_ML_Detection but will leverge more tailored fields with synthetic data
+├── DDOS_ML_Detection/              # DDoS detection models using XGBoost and PyTorch
+└── Anamolous_Inbound_Traffic_Logs/ # UNDER DEVELOPMENT: Tailored detection using synthetic data
+```
 
+## Getting Started
 
-## 🚀 Getting Started
-
-1. Clone the repo:
-   ```bash
+1. Clone the repository:
+```bash
    git clone https://github.com/Dannychz7/Cyber-ML-Detections.git
    cd Cyber-ML-Detections
+```
 
-## Obtaining Datasets
+## Dataset
 
-Recommended Dataset for Network Anomaly Detection:
-______________________________________________________
-- CIC-IDS 2017
+**Recommended Dataset: CIC-IDS 2017**
+
 - URL: https://www.unb.ca/cic/datasets/ids-2017.html
+- Provides comprehensive, realistic network traffic with various attack types including botnets, DDoS attacks, and brute-force intrusions
+- Includes essential network flow features: Flow Bytes/s, Source IP, Destination IP, Protocol, and Flow Duration
+- Ideal for developing and evaluating inbound/outbound traffic volume anomaly detection solutions
 
-- This dataset offers a comprehensive representation of realistic network traffic, encompassing various attack types such as botnets Distributed Denial of Service (DDoS) attacks, and brute-force intrusions.
-- It includes essential network flow features, including Flow Bytes/s, Source IP, Destination IP, Protocol, and Flow Duration.
-- Ideal for: Developing and evaluating solutions for inbound/outbound traffic volume anomaly detection.
-# DISCLAIMER: I do not claim ownership of the CIC-IDS 2017 dataset; all intellectual property rights are reserved by its original creators. #
+**Disclaimer:** I do not claim ownership of the CIC-IDS 2017 dataset. All intellectual property rights are reserved by its original creators.
 
-📫 Contact
-# Maintained by @Dannychz7
-    - Let me know if you want to include screenshots, datasets, or performance metrics later.
+## Status
 
+**Note:** Testing and pipeline functionality are still under refinement and not fully operational at this time.
 
+## Contact
+
+Maintained by @Dannychz7
+
+---
+
+*Future enhancements may include screenshots, additional datasets, and performance metrics.*
